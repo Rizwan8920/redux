@@ -1,12 +1,33 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { logout, selectToken } from "./authSlice";
 
 const USERS_URL = "https://jsonplaceholder.typicode.com/users";
 
 export const fetchUsers = createAsyncThunk(
   "users/fetchUsers",
-  async (_, { rejectWithValue }) => {
+  async (_, thunkAPI) => {
+    const {getState, dispatch, rejectWithValue} = thunkAPI;
+
+    // const token = selectToken(getState());
+    const token = "my-dummy-jwt";
+
+    if(!token){
+        return rejectWithValue("Not authenticated");
+    }
+
     try {
-      const response = await fetch(USERS_URL);
+      const response = await fetch(USERS_URL, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+        },
+      });
+
+      if(response.status === 401){
+        dispatch(logout());
+        return rejectWithValue("Session expired. Please log in again.");
+      }
+
       if (!response.ok) {
         throw new Error(`Request failed with status ${response.status}`);
       }
@@ -19,14 +40,17 @@ export const fetchUsers = createAsyncThunk(
 
 export const fetchUserById = createAsyncThunk(
   "users/fetchUserById",
-  async (userId, { rejectWithValue }) => {
+  async (userId, { signal, rejectWithValue }) => {
     try {
-      const response = await fetch(`${USERS_URL}/${userId}`);
+      const response = await fetch(`${USERS_URL}/${userId}`, {
+        signal,
+      });
       if (!response.ok) {
         throw new Error(`User ${userId} not found (status ${response.status})`);
       }
       return await response.json();
     } catch (err) {
+        if(err.name === "AbortError") throw err;
       return rejectWithValue(err.message);
     }
   },
@@ -76,6 +100,9 @@ const userSlice = createSlice({
       })
       .addCase(fetchUserById.rejected, (state, action) => {
         const id = action.meta.arg;
+        if(action.meta.aborted){
+            delete state.byId[id];
+        }
         state.byId[id] = {
             data: null,
             status: "failed",

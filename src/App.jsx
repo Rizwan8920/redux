@@ -6,6 +6,7 @@ import Todo from "./pages/Todo"
 import Summary from "./pages/Summary"
 import Users from "./pages/Users"
 import UserDetails from "./pages/UserDetails"
+import Post from "./pages/Post"
 
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
         <Route path="/summary" element={<Summary />} />
         <Route path="/users" element={<Users />} />
         <Route path="/users/:id" element={<UserDetails />} />
+        <Route path="/posts" element={<Post />} />
       </Routes>
     </div>
   )

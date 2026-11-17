@@ -4,6 +4,8 @@ import themeReducer from "../features/themeSlice.js";
 import todoReducer from "../features/todoSlice.js";
 import profileReducer from "../features/userProfileSlice.js";
 import userReducer from "../features/userSlice.js";
+import authReducer from "../features/authSlice.js";
+import postReducer from "../features/postSlice.js";
 
 export const store = configureStore({
     reducer: {
@@ -12,5 +14,7 @@ export const store = configureStore({
         todo: todoReducer,
         profile: profileReducer,
         users: userReducer,
-    }
+        auth: authReducer,
+        posts: postReducer,
+    },
 })

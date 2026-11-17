@@ -9,7 +9,11 @@ function UserDetails() {
     const entry = useSelector(selectUserById(id));
 
     useEffect(() => {
-        dispatch(fetchUserById(id));
+        const promise = dispatch(fetchUserById(id));
+
+        return () => {
+            promise.abort();
+        }
     }, [id, dispatch]);
 
     if(!entry || entry.status === "loading") return <p>Loading user...</p>;
