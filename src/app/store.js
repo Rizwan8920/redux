@@ -6,6 +6,7 @@ import profileReducer from "../features/userProfileSlice.js";
 import userReducer from "../features/userSlice.js";
 import authReducer from "../features/authSlice.js";
 import postReducer from "../features/postSlice.js";
+import feedReducer from "../features/feedSlice.js";
 
 export const store = configureStore({
     reducer: {
@@ -16,5 +17,6 @@ export const store = configureStore({
         users: userReducer,
         auth: authReducer,
         posts: postReducer,
+        feed: feedReducer,
     },
 })

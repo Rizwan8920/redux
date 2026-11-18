@@ -61,24 +61,69 @@ export const login = createAsyncThunk(
             return rejectWithValue(err.message);
         }
     }
-)
+);
+
+export const logout = createAsyncThunk("auth/logout", async () => {
+    clearAuth();
+})
+
+const {token, user} = loadAuth();
 
 const authSlice = createSlice({
     name: "auth",
     initialState: {
-        token: null,
+        token,
+        user,
+        status: "idle",
+        error: null,
     },
-    reducers: {
-        setToken: (state, action) => {
-            state.token = action.payload;
-        },
-        logout: (state) => {
-            state.token = null;
-        }
-    }
-})
+    reducers: {},
+    extraReducers: (builder) => {
+        builder
+            .addCase(login.pending, (state) => {
+                state.status = "loading";
+                state.error = null;
+            })
+            .addCase(login.fulfilled, (state, action) => {
+                state.status = "idle";
+                state.token = action.payload.token;
+                state.user = action.payload.user;
+            })
+            .addCase(login.rejected, (state, action) => {
+                state.status = action.meta.aborted ? "idle" : "failed";
+                state.error = action.meta.aborted
+                    ? null
+                    : action.payload ?? action.error?.message ?? "Login failed";
+            })
+            .addCase(logout.fulfilled, (state) => {
+                state.token = null;
+                state.user = null;
+                state.status = "idle";
+                state.error = null;
+            })
+    },
+});
 
-export const {setToken, logout} = authSlice.actions;
+// const authSlice = createSlice({
+//     name: "auth",
+//     initialState: {
+//         token: null,
+//     },
+//     reducers: {
+//         setToken: (state, action) => {
+//             state.token = action.payload;
+//         },
+//         logout: (state) => {
+//             state.token = null;
+//         }
+//     }
+// })
+
+// export const {setToken, logout} = authSlice.actions;
 export default authSlice.reducer;
 
 export const selectToken = (state) => state.auth.token;
+export const selectUser = (state) => state.auth.user;
+export const selectIsAuthenticated = (state) => Boolean(state.auth.token);
+export const selectAuthStatus = (state) => state.auth.status;
+export const selectAuthError = (state) => state.auth.error;
